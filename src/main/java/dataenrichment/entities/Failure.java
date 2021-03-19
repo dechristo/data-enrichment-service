@@ -13,16 +13,19 @@ public class Failure {
     private String sensorName;
 
     @Column(name = "error_value")
-    private float errorValue;
+    private double errorValue;
 
-    @Column(name = "times")
-    private long times;
+    public Failure() {}
 
-    public Failure(long id, String sensorName, float errorValue, long times) {
+    public Failure(long id, String sensorName, double errorValue) {
         this.id = id;
         this.sensorName = sensorName;
         this.errorValue = errorValue;
-        this.times = times;
+    }
+
+    public Failure(String sensorName, double errorValue) {
+        this.sensorName = sensorName;
+        this.errorValue = errorValue;
     }
 
     public long getId() {
@@ -33,11 +36,19 @@ public class Failure {
         return sensorName;
     }
 
-    public float getErrorValue() {
+    public double getErrorValue() {
         return errorValue;
     }
 
-    public long getTimes() {
-        return times;
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public void setSensorName(String sensorName) {
+        this.sensorName = sensorName;
+    }
+
+    public void setErrorValue(double errorValue) {
+        this.errorValue = errorValue;
     }
 }

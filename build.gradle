@@ -16,5 +16,6 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-web')
     implementation('org.postgresql:postgresql')
     compile group: 'org.apache.pulsar', name: 'pulsar-client', version: '2.7.0'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '2.4.4'
     testImplementation('org.springframework.boot:spring-boot-starter-test')
 }

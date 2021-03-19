@@ -8,6 +8,6 @@ import java.util.List;
 
 @Repository
 public interface FailureRepository extends CrudRepository<Failure, Long> {
-    List<Failure> findBySensorName(String sensorName);
+    List<Failure> findBySensorNameAndErrorValue(String sensorName, double errorValue);
     List<Failure> findAll();
 }
