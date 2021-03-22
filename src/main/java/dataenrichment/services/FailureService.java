@@ -18,6 +18,9 @@ public class FailureService {
     private FailureRepository failureRepository;
 
     @Autowired
+    private DataEnrichmentService dataEnrichmentService;
+
+    @Autowired
     private LocationService locationService;
 
     public List<Failure> getFailures() {
@@ -26,14 +29,6 @@ public class FailureService {
 
     public List<EnrichedTemperatureDataDTO> getEnrichedFailures() {
         List<Failure> failures = failureRepository.findAll();
-        List<EnrichedTemperatureDataDTO> enrichedFailures = failures
-            .stream()
-            .map(failure -> {
-                LocationDTO location = locationService.findBySensorName(failure.getSensorName());
-                return new EnrichedTemperatureDataDTO(failure.getSensorName(), failure.getErrorValue(), location);
-            })
-            .collect(Collectors.toList());
-
-        return enrichedFailures;
+        return dataEnrichmentService.enrich(failures);
     }
 }

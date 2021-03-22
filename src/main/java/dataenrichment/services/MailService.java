@@ -1,5 +1,7 @@
 package dataenrichment.services;
 
+import common.TemperatureSensor;
+import dataenrichment.models.EnrichedTemperatureDataDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -11,11 +13,12 @@ public class MailService {
     @Autowired
     private JavaMailSender javaMailSender;
 
-    void sendEmail() {
+    void sendEmail(EnrichedTemperatureDataDTO data) {
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setTo("dudu.christo@gmail.com");
-        msg.setSubject("Testing from Spring Boot");
-        msg.setText("Hello World \n Spring Boot Email");
+        msg.setSubject("Sensor High Temperature Alert: " + data.getName());
+        msg.setText(String.format("Sensor %s had a high temperature reading: \n Value: %s \n City: %s \n Country: %s",
+            data.getName(), data.getValue(), data.getLocation().getCity(), data.getLocation().getCountry()));
         javaMailSender.send(msg);
     }
 }

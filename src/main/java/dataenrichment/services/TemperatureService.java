@@ -2,6 +2,7 @@ package dataenrichment.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.TemperatureSensor;
 import dataenrichment.entities.Failure;
+import dataenrichment.models.EnrichedTemperatureDataDTO;
 import dataenrichment.repository.FailureRepository;
 import org.apache.pulsar.client.api.Consumer;
 import org.apache.pulsar.client.api.MessageListener;
@@ -19,6 +20,9 @@ public class TemperatureService {
 
     @Autowired
     private FailureRepository failureRepository;
+
+    @Autowired
+    private DataEnrichmentService dataEnrichmentService;
 
     @Autowired
     private MailService mailService;
@@ -57,17 +61,20 @@ public class TemperatureService {
     }
 
     private void handleTemperatureAlert(TemperatureSensor data) {
+        Failure failure = null;
         if (data.getValue() >= 34) {
             logger.warn(String.format("Critical temperature event at sensor %s :  %s", data.getName(), data.getValue()));
             try {
-                failureRepository.save(new Failure(data.getName(), data.getValue()));
+                failure = new Failure(data.getName(), data.getValue());
+                failureRepository.save(failure);
             }
             catch (Exception ex) {
                 logger.error("Failed to save sensor error data into database: " + ex.getMessage());
             }
 
+            EnrichedTemperatureDataDTO enrichedTemperatureDataDTO = dataEnrichmentService.enrich(failure);
             try {
-                mailService.sendEmail();
+                mailService.sendEmail(enrichedTemperatureDataDTO);
             }
             catch (Exception ex) {
                 logger.error("Failed to send sensor error data email: " + ex.getMessage());
