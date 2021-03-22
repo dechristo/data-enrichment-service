@@ -1,6 +1,7 @@
 package dataenrichment.controllers;
 
 import dataenrichment.entities.Failure;
+import dataenrichment.models.EnrichedTemperatureDataDTO;
 import dataenrichment.services.FailureService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -20,4 +21,7 @@ public class FailureController {
     public List<Failure> getFailures() {
         return failureService.getFailures();
     }
+
+    @GetMapping("/enriched-failures")
+    public List<EnrichedTemperatureDataDTO> getEnrichedFailures() { return failureService.getEnrichedFailures();}
 }

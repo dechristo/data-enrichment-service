@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 @Service
 public class TemperatureService {
@@ -35,7 +34,7 @@ public class TemperatureService {
                 .build();
 
             pulsarConsumer = client.newConsumer(JSONSchema.of(TemperatureSensor.class))
-                .topic("temperature-sensor-1a")
+                .topic("temperature-sensor-event")
                 .subscriptionName("data-enrichment-service-temperature")
                 .messageListener((MessageListener<TemperatureSensor>) (consumer, msg) -> {
                     logger.info("Message received.");
@@ -60,8 +59,19 @@ public class TemperatureService {
     private void handleTemperatureAlert(TemperatureSensor data) {
         if (data.getValue() >= 34) {
             logger.warn(String.format("Critical temperature event at sensor %s :  %s", data.getName(), data.getValue()));
-            failureRepository.save(new Failure(data.getName(), data.getValue()));
-            mailService.sendEmail();
+            try {
+                failureRepository.save(new Failure(data.getName(), data.getValue()));
+            }
+            catch (Exception ex) {
+                logger.error("Failed to save sensor error data into database: " + ex.getMessage());
+            }
+
+            try {
+                mailService.sendEmail();
+            }
+            catch (Exception ex) {
+                logger.error("Failed to send sensor error data email: " + ex.getMessage());
+            }
         }
     }
 }

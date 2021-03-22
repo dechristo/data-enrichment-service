@@ -1,12 +1,12 @@
 package dataenrichment.models;
 
-public class Location {
+public class LocationDTO {
     private String city;
     private String country;
 
-    public Location() {}
+    public LocationDTO() {}
 
-    public Location(String city, String country) {
+    public LocationDTO(String city, String country) {
         this.city = city;
         this.country = country;
     }
