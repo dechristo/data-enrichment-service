@@ -15,8 +15,11 @@ import org.springframework.stereotype.Service;
 
 
 @Service
-public class TemperatureService {
+public class TemperatureMonitorService {
     private Logger logger;
+    private static final String PULSAR_URL = "pulsar://localhost:6650";
+    private static final String TOPIC_NAME = "temperature-sensor-event";
+    private static final String SUBSCRIPTION_NAME = "data-enrichment-service-temperature";
 
     @Autowired
     private FailureRepository failureRepository;
@@ -28,18 +31,18 @@ public class TemperatureService {
     private MailService mailService;
 
     public void initPulsar() {
-        logger = LoggerFactory.getLogger(TemperatureService.class);
+        logger = LoggerFactory.getLogger(TemperatureMonitorService.class);
         PulsarClient client;
         Consumer<TemperatureSensor> pulsarConsumer;
 
         try {
             client = PulsarClient.builder()
-                .serviceUrl("pulsar://localhost:6650")
+                .serviceUrl(PULSAR_URL)
                 .build();
 
             pulsarConsumer = client.newConsumer(JSONSchema.of(TemperatureSensor.class))
-                .topic("temperature-sensor-event")
-                .subscriptionName("data-enrichment-service-temperature")
+                .topic(TOPIC_NAME)
+                .subscriptionName(SUBSCRIPTION_NAME)
                 .messageListener((MessageListener<TemperatureSensor>) (consumer, msg) -> {
                     logger.info("Message received.");
 
@@ -56,7 +59,7 @@ public class TemperatureService {
                 })
                 .subscribe();
         } catch (Exception ex) {
-            // log error
+            logger.error("Error consuming message: " + ex.getMessage());
         }
     }
 
@@ -64,21 +67,30 @@ public class TemperatureService {
         Failure failure = null;
         if (data.getValue() >= 34) {
             logger.warn(String.format("Critical temperature event at sensor %s :  %s", data.getName(), data.getValue()));
-            try {
-                failure = new Failure(data.getName(), data.getValue());
-                failureRepository.save(failure);
-            }
-            catch (Exception ex) {
-                logger.error("Failed to save sensor error data into database: " + ex.getMessage());
-            }
+            failure = new Failure(data.getName(), data.getValue());
+            this.saveFailure(failure);
+            this.notifyByEmail(failure);
+        }
+    }
 
-            EnrichedTemperatureDataDTO enrichedTemperatureDataDTO = dataEnrichmentService.enrich(failure);
-            try {
-                mailService.sendEmail(enrichedTemperatureDataDTO);
-            }
-            catch (Exception ex) {
-                logger.error("Failed to send sensor error data email: " + ex.getMessage());
-            }
+    private void saveFailure(Failure failure) {
+        try {
+            failureRepository.save(failure);
+            logger.info(String.format("Critical failure for sensor %s saved.", failure.getSensorName()));
+        }
+        catch (Exception ex) {
+            logger.error("Failed to save sensor error data into database: " + ex.getMessage());
+        }
+    }
+
+    private void notifyByEmail(Failure failure) {
+        EnrichedTemperatureDataDTO enrichedTemperatureDataDTO = dataEnrichmentService.enrich(failure);
+        try {
+            mailService.sendEmail(enrichedTemperatureDataDTO);
+            logger.info("Email sent.");
+        }
+        catch (Exception ex) {
+            logger.error("Failed to send sensor error data email: " + ex.getMessage());
         }
     }
 }

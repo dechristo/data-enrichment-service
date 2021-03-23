@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import dataenrichment.entities.Location;
 import dataenrichment.services.LocationService;
-import dataenrichment.services.TemperatureService;
+import dataenrichment.services.TemperatureMonitorService;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,16 +29,18 @@ public class LocationControllerTest {
     private LocationService service;
 
     @MockBean
-    private TemperatureService temperatureService;
+    private TemperatureMonitorService temperatureMonitorService;
 
     @Test
-    public void getAllgreetingShouldReturnAllLocationsService() throws Exception {
+    public void getAllShouldReturnAllLocations() throws Exception {
         List<Location> locations = new LinkedList<>();
         locations.add(new Location((long)1, "USA", "Miami", "sensor-mia1"));
         locations.add(new Location((long)2, "Finland", "Helsinki", "sensor-mia1"));
 
         when(service.findAll()).thenReturn(locations);
-        this.mockMvc.perform(get("/locations")).andDo(print()).andExpect(status().isOk())
-            .andExpect(content().string(containsString("Hello, Mock")));
+        this.mockMvc.perform(get("/locations"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(content().json("[{\"id\":1,\"country\":\"USA\",\"city\":\"Miami\",\"sensorName\":\"sensor-mia1\"},{\"id\":2,\"country\":\"Finland\",\"city\":\"Helsinki\",\"sensorName\":\"sensor-mia1\"}]"));
     }
 }

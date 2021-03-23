@@ -1,6 +1,5 @@
 package dataenrichment.services;
 
-import common.TemperatureSensor;
 import dataenrichment.entities.Failure;
 import dataenrichment.models.EnrichedTemperatureDataDTO;
 import dataenrichment.models.LocationDTO;

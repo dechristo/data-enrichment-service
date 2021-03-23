@@ -1,6 +1,6 @@
 package dataenrichment;
 
-import dataenrichment.services.TemperatureService;
+import dataenrichment.services.TemperatureMonitorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,7 +11,7 @@ import javax.annotation.PostConstruct;
 public class App {
 
     @Autowired
-    private TemperatureService temperatureService;
+    private TemperatureMonitorService temperatureMonitorService;
 
     public static void main(String... args) {
         SpringApplication.run(App.class, args);
@@ -19,6 +19,6 @@ public class App {
 
     @PostConstruct
     public void start() {
-        temperatureService.initPulsar();
+        temperatureMonitorService.initPulsar();
     }
 }

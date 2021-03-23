@@ -15,7 +15,6 @@ public class LocationController {
 
     @GetMapping("/locations")
     public List<Location> getAll() {
-
         return service.findAll();
     }
 }
