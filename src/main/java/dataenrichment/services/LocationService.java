@@ -5,6 +5,7 @@ import dataenrichment.models.LocationDTO;
 import dataenrichment.repository.LocationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -28,5 +29,9 @@ public class LocationService {
         }
 
         return null;
+    }
+
+    public void create(Location location) {
+        this.repository.save(location);
     }
 }
